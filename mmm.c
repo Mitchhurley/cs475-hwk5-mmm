@@ -40,6 +40,7 @@ void mmm_seq() {
  */
 void *mmm_par(void *args) {
 	// TODO - code to perform parallel MMM
+	return NULL;
 }
 
 /**
