@@ -6,6 +6,11 @@
 #include "rtclock.h"
 #include "mmm.h"
 
+int matSize;
+int **inputA;
+int **inputB;
+int **output;
+
 int main(int argc, char *argv[]) {
 	double clockstart, clockend;
 	clockstart = rtclock(); // start clocking
@@ -38,6 +43,9 @@ int main(int argc, char *argv[]) {
 				exit(1);
 			}
 		}
+		matSize = atoi(argv[3]);
+		mmm_init();
+		mmm_freeup();
 	}
 
 	else if (argc == 3){
@@ -56,7 +64,14 @@ int main(int argc, char *argv[]) {
 				exit(1);
 			}
 		}
+		matSize = atoi(argv[2]);
+		mmm_init();
+		mmm_freeup();
 		
+	}
+	else {
+		printf("Invalid Usage: S <Size> |OR| P <Threads> <Size>\n");
+		exit(1);
 	}
 	// end: stuff I want to clock
 	clockend = rtclock(); // stop clocking

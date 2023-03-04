@@ -10,7 +10,27 @@
  * the input matrices with random integers from 0 to 99
  */
 void mmm_init() {
-	// TODO
+	inputA = (int**) malloc(sizeof(int*) * matSize);
+	inputB = (int**) malloc(sizeof(int*) * matSize);
+	output = (int**) malloc(sizeof(int*) * matSize);
+	for (int i = 0; i < matSize; i++){
+		inputA[i] = (int*) malloc(sizeof(int) * matSize);
+		inputB[i] = (int*) malloc(sizeof(int) * matSize);
+		output[i] = (int*) malloc(sizeof(int) * matSize);
+	}
+	for (int i = 0; i < matSize; i++){
+		for (int j = 0; j < matSize; j++){
+			inputA[i][j] = rand() % 100;
+			inputB[i][j] = rand() % 100;
+		}
+	}
+	printf("Resultant matrix A:\n");
+    for (int i = 0; i < matSize; i++) {
+        for (int j = 0; j < matSize; j++) {
+            printf("%d ", inputA[i][j]);
+        }
+        printf("\n");
+    }
 }
 
 /**
@@ -25,7 +45,17 @@ void mmm_reset(double **matrix) {
  * Free up memory allocated to all matrices
  */
 void mmm_freeup() {
-	// TODO
+	for (int i = 0; i < matSize; i++) {
+    	free(inputA[i]);
+		free(inputB[i]);
+		free(output[i]);
+    	inputA[i] = NULL;  // remove dangling pointer
+    	inputB[i] = NULL;
+    	output[i] = NULL;
+ 	}
+	free(inputA);
+	free(inputB);
+	free(output);
 }
 
 /**

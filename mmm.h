@@ -12,4 +12,9 @@ void mmm_seq();
 void *mmm_par(void *args);
 double mmm_verify();
 
+extern int matSize;
+extern int **inputA;
+extern int **inputB;
+extern int **output;
+
 #endif /* MMM_H_ */
