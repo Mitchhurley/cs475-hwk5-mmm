@@ -39,7 +39,11 @@ void mmm_init() {
  * @param matrix pointer to a 2D array
  */
 void mmm_reset(double **matrix) {
-	// TODO
+	for (int i = 0; i < matSize; i++){
+		for (int j = 0; j < matSize; j++){
+			inputA[i][j] = 0;
+		}
+	}
 }
 
 /**
@@ -63,12 +67,13 @@ void mmm_freeup() {
  * Sequential MMM
  */
 void mmm_seq() {
-	printf("%d is Mat size\n", matSize);
 	for (int i = 0; i < matSize; i++) {
         for (int j = 0; j < matSize; j++) {
+			int sum = 0;
             for (int k = 0; k < matSize; k++) {
-                output[i][j] += inputA[i][k] * inputB[k][j];
+                sum += inputA[i][k] * inputB[k][j];
             }
+			output[i][j] = sum;
         }
     }
 }
@@ -77,17 +82,14 @@ void mmm_seq() {
  * Parallel MMM
  */
 void *mmm_par(void *args) {
-	// TODO - code to perform parallel MMM
 	matParams *pars = (matParams*) args;
-	int l = 0;
-	for (int i = pars->Pstart; i < pars->Pend; i++) {
-		l = i / matSize;
+	for (int i = pars->Pstart/matSize; i < pars->Pend/matSize; i++) {
         for (int j = 0; j < matSize; j++) {
 			int sum = 0;
             for (int k = 0; k < matSize; k++) {
-				sum += inputA[l][k] * inputB[k][j];
+				sum += inputA[i][k] * inputB[k][j];
             }
-            output[l][j] = sum;
+            output[i][j] = sum;
         }
     }
 	
@@ -108,17 +110,12 @@ double mmm_verify() {
 	}
 	for (int i = 0; i < matSize; i++) {
         for (int j = 0; j < matSize; j++) {
+			int sum = 0;
             for (int k = 0; k < matSize; k++) {
-                outputSeq[i][j] += inputA[i][k] * inputB[k][j];
+                sum += inputA[i][k] * inputB[k][j];
             }
+			outputSeq[i][j] = sum;
         }
-    }
-	printf("Resultant matrix b:\n");
-    for (int i = 0; i < matSize; i++) {
-        for (int j = 0; j < matSize; j++) {
-            printf("%d ", outputSeq[i][j]);
-        }
-        printf("\n");
     }
 	double maxError = 0;
 	for (int i =0; i < matSize;i++){
