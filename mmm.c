@@ -3,6 +3,7 @@
 #include <math.h>
 #include <string.h>
 #include <stdio.h>
+#include "rtclock.h"
 #include "mmm.h"
 
 /**
@@ -104,10 +105,13 @@ void *mmm_par(void *args) {
  * in the result matrices
  */
 double mmm_verify() {
+	//making the allocation and compare not affect timing
+	double rem = rtclock();
 	int **outputSeq = (int**) malloc(sizeof(int*) * matSize);
 	for (int i = 0; i < matSize; i++){
 		outputSeq[i] = (int*) malloc(sizeof(int) * matSize);
 	}
+	clockOffset += rtclock() - rem;
 	for (int i = 0; i < matSize; i++) {
         for (int j = 0; j < matSize; j++) {
 			int sum = 0;
@@ -117,6 +121,7 @@ double mmm_verify() {
 			outputSeq[i][j] = sum;
         }
     }
+	rem = rtclock();
 	double maxError = 0;
 	for (int i =0; i < matSize;i++){
 		for(int j = 0; j < matSize; j++){
@@ -130,5 +135,6 @@ double mmm_verify() {
 		outputSeq[i] = NULL;
 	}
 	free(outputSeq);
+	clockOffset += rtclock() - rem;
 	return maxError;
 }

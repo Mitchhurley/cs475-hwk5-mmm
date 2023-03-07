@@ -16,6 +16,7 @@ extern int matSize;
 extern int **inputA;
 extern int **inputB;
 extern int **output;
+extern double clockOffset;
 
 typedef struct matParams{
     int Pstart;

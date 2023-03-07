@@ -11,6 +11,7 @@ int matSize;
 int **inputA;
 int **inputB;
 int **output;
+double clockOffset;
 double clocktotalPar;
 double clocktotalSeq;
 double biggestMistake = 0;
@@ -22,12 +23,9 @@ int main(int argc, char *argv[]) {
 	while (numruns > 0){
 		double clockstart, clockend;
 		// start clocking
-
-		// start: stuff I want to clock
 		//If there are 4 args, its parallel
 		if (argc == 4){
-			clockstart = rtclock();
-			//make sure that the first val is P
+			//Error handling, making sure val 1 is p, that size and threads are acceptable intergers etc...
 			if (*argv[1] != 'P'){
 				printf("Proper syntax: P <Threads> <Size>\n");
 				exit(1);
@@ -54,44 +52,36 @@ int main(int argc, char *argv[]) {
 			}
 			matSize = atoi(argv[3]);
 			int threadCount = atoi(argv[2]);
+			//Print out run info on first go around
 			if (numruns == 4){
 				printf("========\nmode: Parallel\nThread Count: %d\nSize: %d\n========\n", threadCount, matSize);
 			}
 			mmm_init();
-			double split = rtclock();
-			if (numruns == 4) printf("Checking split 1 %f \n",split - clockstart);
 			matParams *args = (matParams*) malloc(threadCount * sizeof(matParams));
 			pthread_t *threads = (pthread_t*) malloc(threadCount * sizeof(pthread_t));
 			int numToTake = (matSize * matSize) / threadCount;
 			int i= 0;
-			
+			clockstart = rtclock();
 			for (i = 0; i < threadCount - 1; i++){
 				args[i].Pstart = (i * numToTake);
 				args[i].Pend = (i + 1)* numToTake;
+				pthread_create(&threads[i], NULL, mmm_par, (void*) &args[i]);
 				
 			}
-			split = rtclock();
-			if (numruns == 4) printf("Checking split 2 %f \n",split - clockstart);
 			args[threadCount - 1].Pstart = (threadCount - 1) * numToTake;
 			args[threadCount - 1].Pend = matSize * matSize;
-			for (i = 0; i < threadCount - 1; i++){
-				pthread_create(&threads[i], NULL, mmm_par, (void*) &args[i]);
-			}
 			pthread_create(&threads[threadCount - 1], NULL, mmm_par, (void*) &args[threadCount - 1]);
-			split = rtclock();
-			if (numruns == 4) printf("Checking split 3 %f \n",split - clockstart);
 			// Wait for threads to complete
 			for (int i = 0; i < threadCount; i++) {
 				pthread_join(threads[i], NULL);
 			}
-			split = rtclock();
-			if (numruns == 4) printf("Checking split 4 %f \n",split - clockstart);
 			clockend = rtclock();
 			if (numruns != 4){ clocktotalPar += clockend - clockstart;}
 			clockstart = rtclock();
+			clockOffset = 0;
 			biggestMistake = fmax(biggestMistake,mmm_verify());
 			clockend = rtclock();
-			if (numruns != 4){clocktotalSeq += clockend - clockstart;}
+			if (numruns != 4){clocktotalSeq += clockend - clockstart; clocktotalSeq -= clockOffset;}
 			free(args);
 			free(threads);
 			mmm_freeup();
