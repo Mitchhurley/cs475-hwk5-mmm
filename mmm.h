@@ -17,4 +17,8 @@ extern int **inputA;
 extern int **inputB;
 extern int **output;
 
+typedef struct matParams{
+    int Pstart;
+    int Pend;
+} matParams;
 #endif /* MMM_H_ */

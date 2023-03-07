@@ -24,13 +24,14 @@ void mmm_init() {
 			inputB[i][j] = rand() % 100;
 		}
 	}
+	/*
 	printf("Resultant matrix A:\n");
     for (int i = 0; i < matSize; i++) {
         for (int j = 0; j < matSize; j++) {
             printf("%d ", inputA[i][j]);
         }
         printf("\n");
-    }
+    }*/
 }
 
 /**
@@ -49,7 +50,7 @@ void mmm_freeup() {
     	free(inputA[i]);
 		free(inputB[i]);
 		free(output[i]);
-    	inputA[i] = NULL;  // remove dangling pointer
+    	inputA[i] = NULL;  // remove dangling pointers
     	inputB[i] = NULL;
     	output[i] = NULL;
  	}
@@ -62,7 +63,14 @@ void mmm_freeup() {
  * Sequential MMM
  */
 void mmm_seq() {
-	// TODO - code to perform sequential MMM
+	printf("%d is Mat size\n", matSize);
+	for (int i = 0; i < matSize; i++) {
+        for (int j = 0; j < matSize; j++) {
+            for (int k = 0; k < matSize; k++) {
+                output[i][j] += inputA[i][k] * inputB[k][j];
+            }
+        }
+    }
 }
 
 /**
@@ -70,6 +78,19 @@ void mmm_seq() {
  */
 void *mmm_par(void *args) {
 	// TODO - code to perform parallel MMM
+	matParams *pars = (matParams*) args;
+	int l = 0;
+	for (int i = pars->Pstart; i < pars->Pend; i++) {
+		l = i / matSize;
+        for (int j = 0; j < matSize; j++) {
+			int sum = 0;
+            for (int k = 0; k < matSize; k++) {
+				sum += inputA[l][k] * inputB[k][j];
+            }
+            output[l][j] = sum;
+        }
+    }
+	
 	return NULL;
 }
 
@@ -81,6 +102,36 @@ void *mmm_par(void *args) {
  * in the result matrices
  */
 double mmm_verify() {
-	// TODO
-	return -1;
+	int **outputSeq = (int**) malloc(sizeof(int*) * matSize);
+	for (int i = 0; i < matSize; i++){
+		outputSeq[i] = (int*) malloc(sizeof(int) * matSize);
+	}
+	for (int i = 0; i < matSize; i++) {
+        for (int j = 0; j < matSize; j++) {
+            for (int k = 0; k < matSize; k++) {
+                outputSeq[i][j] += inputA[i][k] * inputB[k][j];
+            }
+        }
+    }
+	printf("Resultant matrix b:\n");
+    for (int i = 0; i < matSize; i++) {
+        for (int j = 0; j < matSize; j++) {
+            printf("%d ", outputSeq[i][j]);
+        }
+        printf("\n");
+    }
+	double maxError = 0;
+	for (int i =0; i < matSize;i++){
+		for(int j = 0; j < matSize; j++){
+			if (abs(outputSeq[i][j] - output[i][j]) > maxError){
+				maxError = abs(outputSeq[i][j] - output[i][j]);
+			}
+		}
+	}
+	for (int i = 0; i < matSize; i++){
+    	free(outputSeq[i]);
+		outputSeq[i] = NULL;
+	}
+	free(outputSeq);
+	return maxError;
 }
